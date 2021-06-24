@@ -1,11 +1,45 @@
 <template>
   <div class="container">
-    <div>
-      <h1 class="title">{{ currentChord }}</h1>
-      <button @click="controlInterval()" class="button">
-        <span v-if="!isRunning">Start</span> <span v-else>Stop</span>
-      </button>
-    </div>
+    <section class="section">
+      <div class="display">
+        <h1 class="chord has-text-weight-bold">
+          <span class="chord__root">
+            {{ currentChord.root }}
+          </span>
+          <span
+            :class="
+              'chord__alteration chord__alteration--' + currentChord.alteration
+            "
+          >
+            {{ currentChord.alteration }}
+          </span>
+          <span class="chord__type">
+            {{ currentChord.type }}
+          </span>
+        </h1>
+      </div>
+      <div class="control">
+        <div class="field has-addons">
+          <div class="control">
+            <input
+              class="input is-medium is-rounded"
+              type="text"
+              placeholder="Tempo"
+              v-model="tempo"
+              v-on:keyup="typeInput"
+            />
+          </div>
+          <div class="control">
+            <a
+              class="button is-medium is-rounded"
+              :class="isRunning ? 'is-link' : 'is-primary'"
+              @click="controlInterval()"
+              ><span v-if="!isRunning">Start</span> <span v-else>Stop</span></a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -17,23 +51,51 @@ export default {
     return {
       isRunning: false,
       chords: Chords,
-      tempo: 500,
+      tempo: 1500,
       t: null,
-      currentChord: null,
+      currentChord: {
+        root: '',
+        alteration: '',
+        type: '',
+      },
     }
   },
   methods: {
-    computeChord: function () {
+    computeRoot: function () {
       return this.chords.root[
         Math.floor(Math.random() * this.chords.root.length)
       ]
+    },
+    computeAlteration: function () {
+      return this.chords.alterations[
+        Math.floor(Math.random() * this.chords.alterations.length)
+      ]
+    },
+    computeType: function () {
+      return this.chords.type[
+        Math.floor(Math.random() * this.chords.type.length)
+      ]
+    },
+    typeInput: function (e) {
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        this.controlInterval()
+      } else {
+        this.stopChordMachine()
+      }
+    },
+    stopChordMachine: function () {
+      console.log('stop')
+      this.isRunning = false
+      clearInterval(this.t)
+      this.t = null
     },
     controlInterval: function () {
       if (!this.isRunning) {
         this.isRunning = true
         this.t = setInterval(() => {
-          this.currentChord = this.computeChord()
-          console.log(this.currentChord)
+          this.currentChord.root = this.computeRoot()
+          this.currentChord.alteration = this.computeAlteration()
+          this.currentChord.type = this.computeType()
         }, this.tempo)
       } else {
         this.isRunning = false
@@ -45,14 +107,47 @@ export default {
 }
 </script>
 
-<style>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
+<style lang="scss">
+.chord-machine {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+}
+.display {
+  margin: 6rem 0;
+}
+.chord {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8rem;
+
+  &__root {
+    color: #12151f;
+  }
+  &__alteration {
+    color: #05f4b7;
+
+    &--b {
+      margin-top: 45px;
+    }
+
+    &--\# {
+      margin-bottom: 45px;
+    }
+  }
+  &__type {
+    color: #371bb1;
+  }
+}
+
+.control {
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
 }
 
 .title {
