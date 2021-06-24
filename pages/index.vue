@@ -1,34 +1,48 @@
 <template>
   <div class="container">
     <div>
-      <Logo />
-      <h1 class="title">
-        rnd-chord
-      </h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
+      <h1 class="title">{{ currentChord }}</h1>
+      <button @click="controlInterval()" class="button">
+        <span v-if="!isRunning">Start</span> <span v-else>Stop</span>
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-export default {}
+import { default as Chords } from '../plugins/chords'
+
+export default {
+  data() {
+    return {
+      isRunning: false,
+      chords: Chords,
+      tempo: 500,
+      t: null,
+      currentChord: null,
+    }
+  },
+  methods: {
+    computeChord: function () {
+      return this.chords.root[
+        Math.floor(Math.random() * this.chords.root.length)
+      ]
+    },
+    controlInterval: function () {
+      if (!this.isRunning) {
+        this.isRunning = true
+        this.t = setInterval(() => {
+          this.currentChord = this.computeChord()
+          console.log(this.currentChord)
+        }, this.tempo)
+      } else {
+        this.isRunning = false
+        clearInterval(this.t)
+        this.t = null
+      }
+    },
+  },
+}
 </script>
 
 <style>
@@ -42,16 +56,8 @@ export default {}
 }
 
 .title {
-  font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
+  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   display: block;
   font-weight: 300;
   font-size: 100px;
